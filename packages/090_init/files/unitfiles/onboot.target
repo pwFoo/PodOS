@@ -1,0 +1,5 @@
+[Unit]
+Description= Onboot services checkpoint
+
+[Install]
+WantedBy=default.target

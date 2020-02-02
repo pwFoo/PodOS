@@ -1,0 +1,10 @@
+[Unit]
+Description= Start rngd
+
+[Service]
+ExecStart=/usr/sbin/rngd -f -r /dev/urandom -p /var/run/rngd.pid
+Type=simple
+Restart=always
+
+[Install]
+WantedBy=onboot.target

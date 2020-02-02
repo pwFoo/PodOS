@@ -1,0 +1,9 @@
+[Unit]
+Description= Initialize kernel modules
+
+[Service]
+ExecStart=/bin/sh -c '/bin/grep -h MODALIAS /sys/bus/*/devices/*/uevent | /usr/bin/cut -d= -f2 | /usr/bin/xargs /sbin/modprobe -abq 2> /dev/null'
+Type=oneshot
+
+[Install]
+WantedBy=onboot.target

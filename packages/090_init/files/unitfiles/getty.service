@@ -1,0 +1,18 @@
+[Unit]
+Description= Start getty on /dev/ttyS0 (qemu)
+
+[Service]
+#ExecStart=/sbin/getty -L -n -l /bin/sh -m 38400 tty7 linux
+ExecStart=/sbin/agetty --autologin root --skip-login --keep-baud ttyS0
+#ExecStart=/bin/sh
+Type=simple
+Restart=always
+
+#StandardInput=tty
+#StandardOutput=tty
+#TTYPath=/dev/tty8
+#TTYReset=yes
+#TTYVHangup=yes
+
+[Install]
+WantedBy=getty.target

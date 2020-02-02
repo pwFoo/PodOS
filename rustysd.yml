@@ -1,0 +1,12 @@
+kernel:
+  image: pwfoo/os-kernel:latest
+  cmdline: "console=tty0 console=ttyS0 console=ttyAMA0"
+init:
+  - pwfoo/os-rootfs:latest
+  - pwfoo/os-crun:latest
+  - pwfoo/os-podman:latest
+  - pwfoo/os-modules:latest
+  - pwfoo/os-firmware:latest
+  - pwfoo/os-mdevd:latest
+  - pwfoo/os-rustysd:latest
+  - pwfoo/os-init:latest

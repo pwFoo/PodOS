@@ -1,0 +1,6 @@
+#!/bin/sh
+if [ "$1" == "--version" ]; then
+    echo -e "runc version 1.0.0-rc8\ncommit: 425e105d5a03fabd737a126ad93d62a9eeede87f\nspec: 1.0.1-dev"
+else 
+    crun $@
+fi

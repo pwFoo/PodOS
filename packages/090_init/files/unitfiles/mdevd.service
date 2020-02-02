@@ -1,0 +1,10 @@
+[Unit]
+Description= Start mdevd daemon
+
+[Service]
+ExecStart=/usr/local/sbin/mdevd
+Type=simple
+Restart=always
+
+[Install]
+WantedBy=onboot.target

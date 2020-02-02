@@ -1,0 +1,10 @@
+[Unit]
+Description= Initialize kernel modules
+After=mdevd.service
+
+[Service]
+ExecStart=/usr/local/sbin/mdevd-coldplug
+Type=oneshot
+
+[Install]
+WantedBy=onboot.target

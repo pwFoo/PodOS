@@ -1,0 +1,41 @@
+FROM registry.fedoraproject.org/fedora:latest AS base
+RUN dnf install -y git dnf-utils gcc meson ninja-build libselinux-static libseccomp-static libcap-static \
+    make python git gcc automake autoconf libcap-devel systemd-devel systemd-libs yajl-devel libseccomp-devel cmake \
+    libselinux-devel go-md2man glibc-static python3-libmount libtool
+
+
+FROM base AS systemd
+RUN mkdir /out && yum-builddep -y systemd && git clone --depth 1 https://github.com/systemd/systemd.git \
+    && mkdir systemd/build; cd systemd/build; meson ..; ninja version.h; ninja libsystemd.a; cp libsystemd.a /out
+
+
+FROM base AS yajl
+RUN mkdir /out && git clone --depth=1 https://github.com/lloyd/yajl.git; cd yajl; ./configure LDFLAGS=-static; cd build; make -j $(nproc); find . -name '*.a' -exec cp \{\} /out \;
+
+
+#FROM base
+FROM base AS crun
+COPY --from=systemd /out/* /usr/lib64
+COPY --from=yajl /out/* /usr/lib64
+#COPY build.sh /usr/bin/build.sh
+#CMD /usr/bin/build.sh
+
+#RUN	git clone --branch list-state https://github.com/giuseppe/crun.git /crun
+RUN	git clone https://github.com/giuseppe/crun.git /crun
+
+RUN 	mkdir -p /crun/static-build
+WORKDIR	/crun/static-build
+RUN	test -e ../configure || (cd /crun; ./autogen.sh)
+RUN	../configure CRUN_LDFLAGS='-all-static' LDFLAGS="-static-libgcc -static" LIBS="/usr/lib64/libcap.a /usr/lib64/libseccomp.a /usr/lib64/libsystemd.a /usr/lib64/libyajl_s.a /usr/lib64/libselinux.a"
+RUN	make -j $(nproc)
+
+RUN	mkdir -p /mnt/usr/bin/
+RUN	cp -a crun /mnt/usr/bin/
+WORKDIR /mnt/usr/bin/
+RUN	ln -s crun runc
+
+COPY	files/ /mnt/
+
+
+FROM	scratch
+COPY	--from=crun /mnt/ /

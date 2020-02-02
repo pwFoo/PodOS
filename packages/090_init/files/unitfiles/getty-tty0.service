@@ -1,0 +1,17 @@
+[Unit]
+Description= Start getty on /dev/tty0
+
+[Service]
+ExecStart=/sbin/agetty --autologin root --skip-login --keep-baud tty0
+#ExecStart=/bin/sh
+Type=simple
+Restart=always
+
+#StandardInput=tty
+#StandardOutput=tty
+#TTYPath=/dev/tty8
+#TTYReset=yes
+#TTYVHangup=yes
+
+[Install]
+WantedBy=getty.target

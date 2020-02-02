@@ -1,0 +1,67 @@
+#!/bin/sh
+
+
+## proc 
+/bin/mount -t proc proc /proc
+
+
+## sysfs
+sysfs_opts=nodev,noexec,nosuid
+/bin/mount -n -t sysfs -o ${sysfs_opts} sysfs /sys
+
+
+## devfs
+/bin/mount -n -t devtmpfs dev /dev -o nosuid,noexec,relatime,size=64k,nr_inodes=10240,mode=755
+
+
+## mount devpts
+mkdir /dev/pts
+mount -t devpts none /dev/pts
+
+
+## create shm
+mkdir /dev/shm
+mount -t tmpfs /dev/shm
+
+
+## mount cgroup
+(
+mount -t tmpfs -o uid=0,gid=0,mode=0755,size=64k cgroup /sys/fs/cgroup
+cd /sys/fs/cgroup || exit 1
+
+awk '!/^#/ { if ($4 == 1) print $1 }' /proc/cgroups | while IFS= read -r sys; do
+  mkdir -p "$sys"
+    if ! mountpoint -q "$sys"; then
+        if ! mount -n -t cgroup -o "$sys" cgroup "$sys"; then
+	      rmdir "$sys" || true
+        fi
+    fi
+done
+)
+
+
+## use hierarchy for memory
+echo 1 > /sys/fs/cgroup/memory/memory.use_hierarchy
+
+
+## load modules 
+#grep -h MODALIAS /sys/bus/*/devices/*/uevent | cut -d= -f2 | xargs /sbin/modprobe -abq 2> /dev/null
+
+
+## Start rngd (TRNG)
+#if [ -c /dev/urandom ]; then
+#    rngd -f -r /dev/urandom -p /var/run/rngd.pid > /var/log/rngd.log 2>&1 &
+#fi
+
+
+# Configure networking
+#ip link set lo up
+#ip link set eth0 up
+
+
+## start dhcp client
+#udhcpc -f -p /var/run/udhcpc.pid > /var/log/udhcpc.log 2>&1 &
+
+
+## start systemd replacement as PID1
+exec /usr/sbin/rustysd

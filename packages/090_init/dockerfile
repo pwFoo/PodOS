@@ -1,0 +1,12 @@
+FROM	alpine
+#FROM	scratch
+
+RUN	apk --update --no-cache add util-linux
+
+COPY	files/ /
+
+ENV	BACKTRACE=1
+
+RUN	echo root:password | chpasswd
+
+ENTRYPOINT	/init

@@ -1,0 +1,12 @@
+[Unit]
+Description= Start networking
+After=modules.service
+
+[Service]
+ExecStartPre=/bin/sh -c '/sbin/ip link set lo up; /sbin/ip link set eth0 up'
+ExecStart=/sbin/udhcpc -f -p /var/run/udhcpc.pid
+Type=simple
+Restart=always
+
+[Install]
+WantedBy=onboot.target
